@@ -1,14 +1,12 @@
 
-//This is  minmal example on how to place polygon overlays with annotations in openseadragon
-// by Robert Krueger
+//This is  minimal example on how to place polygon overlays with annotations in openseadragon
 
 
 //init seadragon
 viewer = OpenSeadragon({
     id: "openseadragon",
         prefixUrl: "/FreeSelection/css/images/",
-        tileSources: "/FreeSelection/data/tiles/channel_00.dzi",
-    //need to define the text annotation here (we therefore use the built in rect html overlays)
+        tileSources: "/FreeSelection/data/tiles/channel_00.dzi", //set your own pyramid location here
 });
 
 
@@ -19,10 +17,10 @@ viewer.setControlsEnabled(true);
 viewer.addHandler('open', () => {
     let printButton = new OpenSeadragon.Button({
         tooltip: 'Print',
-        srcRest: `/FreeSelection/css/images/flip_rest.png`,
-        srcGroup: `/FreeSelection//css/images/flip_grouphover.png`,
-        srcHover: `/FreeSelection//css/images/flip_hover.png`,
-        srcDown: `/FreeSelection//css/images/flip_pressed.png`,
+        srcRest: `/FreeSelection/css/images/button_rest.png`,
+        srcGroup: `/FreeSelection//css/images/button_grouphover.png`,
+        srcHover: `/FreeSelection//css/images/button_hover.png`,
+        srcDown: `/FreeSelection//css/images/button_pressed.png`,
         onClick: switchSelectionMode
     });
 
@@ -32,6 +30,11 @@ viewer.addHandler('open', () => {
 switchSelectionMode = function(){
     isSelectionToolActive = !isSelectionToolActive;
     viewer.setMouseNavEnabled(!isSelectionToolActive);
+    if (isSelectionToolActive){
+        d3.select('body').style("cursor", "crosshair");
+    }else{
+        d3.select('body').style("cursor", "default");
+    }
 }
 
 
@@ -59,36 +62,17 @@ overlay = d3.select(svg_overlay.node())
 //SELECTION POLYGON (LASSO)
 
 polygonSelecton = [];
-
-// lasso_start = function(event){
-//     //reinit the polygon object and set the first point based on mouse position
-//
-//     var webPoint = event.position;
-//     var viewportPoint = viewer.viewport.pointFromPixel(webPoint);
-//     var imagePoint = viewer.viewport.viewportToImageCoordinates(viewportPoint);
-//     console.log(webPoint.toString(), viewportPoint.toString(), imagePoint.toString());
-//
-//     d3.select('#selectionPolygon').remove();
-//     polygonSelecton = [];
-//     polygonSelecton.push({"x":viewportPoint.x,"y":viewportPoint.y});
-//
-// }
-
 var renew = false;
 
 lasso_draw = function(event){
     //add points to polygon and (re)draw
-
     if (renew){
         polygonSelecton = [];
         renew = false;
     }
-
     var webPoint = event.position;
     var viewportPoint = viewer.viewport.pointFromPixel(webPoint);
-    var imagePoint = viewer.viewport.viewportToImageCoordinates(viewportPoint);
-    console.log(webPoint.toString(), viewportPoint.toString(), imagePoint.toString());
-
+    //console.log(webPoint.toString(), viewportPoint.toString());
     polygonSelecton.push({"x":viewportPoint.x,"y":viewportPoint.y});
 
     d3.select('#selectionPolygon').remove();
@@ -107,7 +91,7 @@ lasso_end = function(event){
     var imagePoint = viewer.viewport.viewportToImageCoordinates(viewportPoint);
     console.log(webPoint.toString(), viewportPoint.toString(), imagePoint.toString());
     renew = true;
-    switchSelectionMode();
+    //switchSelectionMode();
 }
 
 var mouse_click = new OpenSeadragon.MouseTracker({
@@ -115,7 +99,6 @@ var mouse_click = new OpenSeadragon.MouseTracker({
     clickHandler: function(event) {
         if(event.quick && isSelectionToolActive){
             console.log('clicked');
-            //lasso_start(event);
         }
     }
 })
