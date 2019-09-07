@@ -1,6 +1,4 @@
-
-//This is  minimal example on how to place polygon overlays with annotations in openseadragon
-
+//This is a minimal example on how to draw a lasso selection and display it as polygon overlay in OSD
 
 //init seadragon
 viewer = OpenSeadragon({
@@ -37,35 +35,16 @@ switchSelectionMode = function(){
     }
 }
 
-
-// Assuming we have an OpenSeadragon Viewer called "viewer", we can catch the clicks
-// with addHandler like so:
-viewer.addHandler('canvas-click', function(event) {
-    // The canvas-click event gives us a position in web coordinates.
-    var webPoint = event.position;
-
-    // Convert that to viewport coordinates, the lingua franca of OpenSeadragon coordinates.
-    var viewportPoint = viewer.viewport.pointFromPixel(webPoint);
-
-    // Convert from viewport coordinates to image coordinates.
-    var imagePoint = viewer.viewport.viewportToImageCoordinates(viewportPoint);
-
-    // Show the results.
-    console.log(webPoint.toString(), viewportPoint.toString(), imagePoint.toString());
-});
-
-
-
 //we also add an svg overlay (plugin) for the fancy stuff
 svg_overlay = viewer.svgOverlay()
 overlay = d3.select(svg_overlay.node())
 
 
 //SELECTION POLYGON (LASSO)
-
-polygonSelecton = [];
+polygonSelection = [];
 var renew = false;
-var numCalls = 0;
+var numCalls = 0; //defines how fine-grained the polygon resolution is (0 = no subsampling, 10=high subsampling)
+
 lasso_draw = function(event){
     //add points to polygon and (re)draw
 
@@ -73,14 +52,13 @@ lasso_draw = function(event){
     var viewportPoint = viewer.viewport.pointFromPixel(webPoint);
     //console.log(webPoint.toString(), viewportPoint.toString());
 
-    //modulo number defines how fine-grained the polygon resolution is (0 = no subsampling, 10=high subsampling)
     if (numCalls % 5 == 0){
         console.log(numCalls)
-        polygonSelecton.push({"x":viewportPoint.x,"y":viewportPoint.y});
+        polygonSelection.push({"x":viewportPoint.x,"y":viewportPoint.y});
     }
 
     d3.select('#selectionPolygon').remove();
-    var selPoly = overlay.selectAll("selectionPolygon").data([polygonSelecton]);
+    var selPoly = overlay.selectAll("selectionPolygon").data([polygonSelection]);
     selPoly.enter().append("polygon")
         .attr('id', 'selectionPolygon')
         .attr("points",function(d) {
@@ -93,10 +71,10 @@ lasso_end = function(event){
 
     //the drawn polygon data
     console.log('original polygon data: ')
-    console.log(polygonSelecton);
+    console.log(polygonSelection);
 
     //the compressed url string for this polygon
-    var encodedPolygonString = toURL(polygonSelecton);
+    var encodedPolygonString = toURL(polygonSelection);
     console.log('compressed polygon string: ');
     console.log(encodedPolygonString)
 
@@ -105,19 +83,10 @@ lasso_end = function(event){
     console.log('decoded polygon data: ')
     console.log(decodedPolygon);
 
-    polygonSelecton = [];
+    polygonSelection = [];
     numCalls = 0;
-    //switchSelectionMode();
 }
 
-// var mouse_click = new OpenSeadragon.MouseTracker({
-//     element: viewer.canvas,
-//     clickHandler: function(event) {
-//         if(event.quick && isSelectionToolActive){
-//             console.log('clicked');
-//         }
-//     }
-// })
 
 var mouse_drag = new OpenSeadragon.MouseTracker({
     element: viewer.canvas,
@@ -138,7 +107,6 @@ var mouse_up = new OpenSeadragon.MouseTracker({
         }
     }
 })
-
 
 var toURL = function(polygon){
     pointString='';
