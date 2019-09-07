@@ -54,6 +54,8 @@ viewer.addHandler('canvas-click', function(event) {
     console.log(webPoint.toString(), viewportPoint.toString(), imagePoint.toString());
 });
 
+
+
 //we also add an svg overlay (plugin) for the fancy stuff
 svg_overlay = viewer.svgOverlay()
 overlay = d3.select(svg_overlay.node())
@@ -63,17 +65,19 @@ overlay = d3.select(svg_overlay.node())
 
 polygonSelecton = [];
 var renew = false;
-
+var numCalls = 0;
 lasso_draw = function(event){
     //add points to polygon and (re)draw
-    if (renew){
-        polygonSelecton = [];
-        renew = false;
-    }
+
     var webPoint = event.position;
     var viewportPoint = viewer.viewport.pointFromPixel(webPoint);
     //console.log(webPoint.toString(), viewportPoint.toString());
-    polygonSelecton.push({"x":viewportPoint.x,"y":viewportPoint.y});
+
+    //modulo number defines how fine-grained the polygon resolution is (0 = no subsampling, 10=high subsampling)
+    if (numCalls % 5 == 0){
+        console.log(numCalls)
+        polygonSelecton.push({"x":viewportPoint.x,"y":viewportPoint.y});
+    }
 
     d3.select('#selectionPolygon').remove();
     var selPoly = overlay.selectAll("selectionPolygon").data([polygonSelecton]);
@@ -81,27 +85,31 @@ lasso_draw = function(event){
         .attr('id', 'selectionPolygon')
         .attr("points",function(d) {
             return d.map(function(d) { return [d.x,d.y].join(","); }).join(" ");})
+    numCalls++;
 }
 
 lasso_end = function(event){
-    //set the last point and make the selection stale.
-
-    var webPoint = event.position;
-    var viewportPoint = viewer.viewport.pointFromPixel(webPoint);
-    var imagePoint = viewer.viewport.viewportToImageCoordinates(viewportPoint);
-    console.log(webPoint.toString(), viewportPoint.toString(), imagePoint.toString());
     renew = true;
+
+    //encode and decode polygon
+    console.log(polygonSelecton);
+    var encodedPolygonString = toURL(polygonSelecton);
+    var decodedPolygon = fromURL(encodedPolygonString);
+    console.log(decodedPolygon);
+
+    polygonSelecton = [];
+    numCalls = 0;
     //switchSelectionMode();
 }
 
-var mouse_click = new OpenSeadragon.MouseTracker({
-    element: viewer.canvas,
-    clickHandler: function(event) {
-        if(event.quick && isSelectionToolActive){
-            console.log('clicked');
-        }
-    }
-})
+// var mouse_click = new OpenSeadragon.MouseTracker({
+//     element: viewer.canvas,
+//     clickHandler: function(event) {
+//         if(event.quick && isSelectionToolActive){
+//             console.log('clicked');
+//         }
+//     }
+// })
 
 var mouse_drag = new OpenSeadragon.MouseTracker({
     element: viewer.canvas,
@@ -122,6 +130,36 @@ var mouse_up = new OpenSeadragon.MouseTracker({
         }
     }
 })
+
+
+var toURL = function(polygon){
+    pointString='';
+    polygon.forEach(function(d){
+        pointString += d.x.toFixed(5) + "," + d.y.toFixed(5) + ",";
+    })
+    pointString = pointString.slice(0, -1); //removes "," at the end
+    var result =  LZString.compressToEncodedURIComponent(pointString);
+    return result;
+}
+
+var fromURL = function(polygonString){
+    var decompressed = LZString.decompressFromEncodedURIComponent(polygonString);
+    var xArray = [];
+    var yArray = [];
+
+    //get all values out of the string
+    decompressed.split(',').forEach(function(d,i){
+        if (i % 2 == 0){ xArray.push(d); }
+        else{ yArray.push(d) }
+    })
+
+    //recreate polygon data structure
+    var newPolygon = [];
+    xArray.forEach(function(d, i){
+        newPolygon.push({x: d, y: yArray[i]});
+    })
+    return newPolygon;
+}
 
 
 //some resizing corrections
