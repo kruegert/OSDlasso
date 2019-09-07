@@ -8,6 +8,9 @@ Click on the extra button to enable the lasso tool (disable the panning/zooming)
 Click on the button again to disable the lasso. 
 
 ## Dependencies:
-d3.js, openseadragonSVGOverlay
-
+- d3.js
+- openseadragon.js (openseadragon)
+- openseadragion-svg-overlay.js (seadragon svg overlay plugin)
+-lz-string.js (compression/encoding/decoding library)
+- encrypt.js (some other encryption lib, currently not used)
 
