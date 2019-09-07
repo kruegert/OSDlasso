@@ -2,7 +2,7 @@
 # Open Seadragon Map Lasso
 This is a minimal example for a lasso based polygon area selection of image regions. The code also contains methods to compress and store the polygon to a string and decompress it back to the polygon data structure.
 
-## COnfiguration/Run:
+## Configuration/Run:
 1) Configure the path to your deepzoom image pyramid index (.dzi file) in index.js
 2) Open index.html in browser.
 
