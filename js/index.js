@@ -92,9 +92,15 @@ lasso_end = function(event){
     renew = true;
 
     //encode and decode polygon
+    console.log('original polygon data: ')
     console.log(polygonSelecton);
+
     var encodedPolygonString = toURL(polygonSelecton);
+    console.log('compressed polygon string: ');
+    console.log(encodedPolygonString)
+
     var decodedPolygon = fromURL(encodedPolygonString);
+    console.log('decoded polygon data: ')
     console.log(decodedPolygon);
 
     polygonSelecton = [];
