@@ -14,6 +14,6 @@ Click on the button again to disable the lasso.
 - d3.js
 - openseadragon.js (openseadragon)
 - openseadragion-svg-overlay.js (seadragon svg overlay plugin)
--lz-string.js (compression/encoding/decoding library)
+- lz-string.js (compression/encoding/decoding library)
 - encrypt.js (some other encryption lib, currently not used)
 
