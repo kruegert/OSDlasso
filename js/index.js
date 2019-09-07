@@ -91,14 +91,16 @@ lasso_draw = function(event){
 lasso_end = function(event){
     renew = true;
 
-    //encode and decode polygon
+    //the drawn polygon data
     console.log('original polygon data: ')
     console.log(polygonSelecton);
 
+    //the compressed url string for this polygon
     var encodedPolygonString = toURL(polygonSelecton);
     console.log('compressed polygon string: ');
     console.log(encodedPolygonString)
 
+    //the decoded polygon (holding the original x,y values for each point)
     var decodedPolygon = fromURL(encodedPolygonString);
     console.log('decoded polygon data: ')
     console.log(decodedPolygon);
@@ -150,8 +152,7 @@ var toURL = function(polygon){
 
 var fromURL = function(polygonString){
     var decompressed = LZString.decompressFromEncodedURIComponent(polygonString);
-    var xArray = [];
-    var yArray = [];
+    var xArray = [], yArray = [];
 
     //get all values out of the string
     decompressed.split(',').forEach(function(d,i){
